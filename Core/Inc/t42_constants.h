@@ -12,7 +12,7 @@
 #define NETHEIGHT 704
 #define MINDACVAL 64
 #define MAXDACVAL 3840
-#define FIELDLENGTH 2208
+#define FIELDLENGTH 1474
 
 extern const uint16_t fieldX[FIELDLENGTH];
 extern const uint16_t fieldY[FIELDLENGTH];

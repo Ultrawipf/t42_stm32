@@ -33,7 +33,7 @@ def main():
     minval = 64
     maxval = 0xF00
     netheight = int(maxval/6)
-    fx,fy,netpos = generateField(minval,maxval,2,netheight)
+    fx,fy,netpos = generateField(minval,maxval,3,netheight)
     print("const uint16_t fieldX[FIELDLENGTH] ={")
     print(",".join([str(v) for v in fx]))
     print("};")

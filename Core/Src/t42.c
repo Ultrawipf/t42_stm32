@@ -49,7 +49,7 @@ volatile uint8_t dacBusy = 0;
 #define g 0.8           //gravitational acceleration (should be positive.)
 #define ts 0.08        // TimeStep TODO tune x16 due to higher resolution
 
-#define historyLength 20
+#define historyLength 35
 
 //float sintable[64];
 //float costable[64];
@@ -96,7 +96,7 @@ void updateGame(){
 
 	if(timUpdateFlag){
 		timUpdateFlag = 0;
-		if((drawState++ % 8) == 0){ // Alternate between buffers
+		if((drawState++ % 6) == 0){ // Alternate between buffers
 			drawDynamic();
 		}else{
 			drawField();
@@ -111,18 +111,21 @@ void updateGame(){
 }
 
 void makeBallTrail(uint16_t length){
-	uint16_t i = 0;
+	uint16_t i = length;
 	dyndacbuflen_cur = 0;
-	while(i<length){
-		for(uint16_t j = 0;j<=i/2;j++){
+
+	while(--i){
+		uint16_t cursteps = i/4;
+		for(uint16_t j = 0;j<=cursteps;j++){
 			if(dyndacbuflen_cur >= DYN_DACBUFSIZE)
 				return;
 
 			dyndacbufX[dyndacbuflen_cur] = xOldList[i];
 			dyndacbufY[dyndacbuflen_cur] = yOldList[i];
 			dyndacbuflen_cur++;
+
 		}
-		++i;
+
 	}
 }
 
