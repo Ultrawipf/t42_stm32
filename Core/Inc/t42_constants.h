@@ -8,12 +8,15 @@
 #ifndef INC_T42_CONSTANTS_H_
 #define INC_T42_CONSTANTS_H_
 #include "main.h"
-#define FIELDLENGTH 1888
+#define NETPOS 1952
+#define NETHEIGHT 704
+#define MINDACVAL 64
+#define MAXDACVAL 3840
+#define FIELDLENGTH 2208
 
 extern const uint16_t fieldX[FIELDLENGTH];
 extern const uint16_t fieldY[FIELDLENGTH];
 
-#define NETPOS 1440
-#define NETHEIGHT 768
+
 
 #endif /* INC_T42_CONSTANTS_H_ */

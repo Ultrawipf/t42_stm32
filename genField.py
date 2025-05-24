@@ -31,8 +31,8 @@ def generateField(min,max,stepsize,netheight):
 
 def main():
     minval = 64
-    maxval = 0xB00
-    netheight = int(maxval/4)
+    maxval = 0xF00
+    netheight = int(maxval/6)
     fx,fy,netpos = generateField(minval,maxval,2,netheight)
     print("const uint16_t fieldX[FIELDLENGTH] ={")
     print(",".join([str(v) for v in fx]))
@@ -43,8 +43,10 @@ def main():
 
     print(f"#define NETPOS {netpos}")
     print(f"#define NETHEIGHT {netheight+minval}")
+    print(f"#define MINDACVAL {minval}")
+    print(f"#define MAXDACVAL {maxval}")
 
-    print("FIELDLENGTH",len(fx))
+    print(f"#define FIELDLENGTH {len(fx)}")
 
 if __name__ == "__main__":
     main()

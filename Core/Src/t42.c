@@ -47,9 +47,9 @@ volatile uint8_t dacBusy = 0;
 
 // Old implementation
 #define g 0.8           //gravitational acceleration (should be positive.)
-#define ts 0.15        // TimeStep TODO tune
+#define ts 0.08        // TimeStep TODO tune x16 due to higher resolution
 
-#define historyLength 10
+#define historyLength 20
 
 //float sintable[64];
 //float costable[64];
@@ -96,7 +96,7 @@ void updateGame(){
 
 	if(timUpdateFlag){
 		timUpdateFlag = 0;
-		if((drawState++ % 4) == 0){ // Alternate between buffers
+		if((drawState++ % 8) == 0){ // Alternate between buffers
 			drawDynamic();
 		}else{
 			drawField();
@@ -188,20 +188,13 @@ void updateGameState(){
 	  if (NewBallDelay)
 	    {
 	      if (HAL_GPIO_ReadPin(BTN1_GPIO_Port, BTN1_Pin) == 0 || HAL_GPIO_ReadPin(BTN2_GPIO_Port, BTN2_Pin) == 0)
-	        NewBallDelay = 10000;
+	        NewBallDelay = 5000;
 
 	      NewBallDelay++;
 
-	      if (NewBallDelay > 5000)  // was 5000
+	      if (NewBallDelay > 2000)  // was 5000
 	        NewBallDelay = 0;
 
-//	      m = 0;
-////	      while (m < 255)
-////	      {
-//	        YOUT(yp);
-//	        XOUT(xp);
-////	        m++;
-////	      }
 
 	      VxNew = VxOld;
 	      VyNew = VyOld;

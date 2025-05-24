@@ -12,9 +12,8 @@
 #define DYN_DACBUFSIZE 128
 #define DACBUFSIZE 512
 
-#define MINDACVAL 64
-#define MAXDACVAL 0xB00 // Scale for net
-#define HITSTRENGTH 18.5
+
+#define HITSTRENGTH 14
 
 
 #define MIN(a,b) (a < b ? a : b)
