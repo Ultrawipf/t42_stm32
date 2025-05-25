@@ -150,6 +150,7 @@ void updateGameState(){
 			Lused = 0;
 
 		//CheckNet = 1;
+		floorbounced = 0;
 	}
 
 	if (NewBall > 10) // IF ball has run out of energy, make a new ball!
@@ -306,7 +307,6 @@ void updateGameState(){
 
 					Lused = 1;
 					NewBall = 0;
-					floorbounced = 0;
 				}
 			}
 
@@ -326,7 +326,6 @@ void updateGameState(){
 
 					Rused = 1;
 					NewBall = 0;
-					floorbounced = 0;
 				}
 			}
 
