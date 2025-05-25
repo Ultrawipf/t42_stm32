@@ -10,10 +10,10 @@
 
 #include "main.h"
 #define DYN_DACBUFSIZE 128
-#define DACBUFSIZE 512
+#define DACBUFSIZE 384
 
 
-#define HITSTRENGTH 14
+#define HITSTRENGTH 20.0f
 
 
 #define MIN(a,b) (a < b ? a : b)

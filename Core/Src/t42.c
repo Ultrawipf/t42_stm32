@@ -44,12 +44,15 @@ volatile uint8_t timUpdateFlag = 0;
 volatile uint8_t gameUpdateFlag = 0;
 volatile uint8_t dacBusy = 0;
 
+GPIO_PinState lastLBtn = 1;
+GPIO_PinState lastRBtn = 1;
+
 
 // Old implementation
 #define g 0.8           //gravitational acceleration (should be positive.)
-#define ts 0.08        // TimeStep TODO tune x16 due to higher resolution
+#define ts 0.12        // TimeStep TODO tune x16 due to higher resolution
 
-#define historyLength 35
+#define historyLength 36
 
 //float sintable[64];
 //float costable[64];
@@ -67,6 +70,7 @@ float VyOld; //  x & y velocity values
 float Xnew, Ynew, VxNew, VyNew;
 
 uint8_t  deadball = 0;
+uint8_t floorbounced = 0;
 
 uint16_t Langle, Rangle;
 
@@ -96,7 +100,7 @@ void updateGame(){
 
 	if(timUpdateFlag){
 		timUpdateFlag = 0;
-		if((drawState++ % 6) == 0){ // Alternate between buffers
+		if((drawState++ % 4) == 0){ // Alternate between buffers
 			drawDynamic();
 		}else{
 			drawField();
@@ -113,230 +117,249 @@ void updateGame(){
 void makeBallTrail(uint16_t length){
 	uint16_t i = length;
 	dyndacbuflen_cur = 0;
-
+	uint16_t lastX = xOldList[length-1],lastY = yOldList[length-1];
 	while(--i){
-		uint16_t cursteps = i/4;
-		for(uint16_t j = 0;j<=cursteps;j++){
+		uint16_t cursteps = (i/6) + 1;
+		for(uint16_t j = 0;j<cursteps;j++){
 			if(dyndacbuflen_cur >= DYN_DACBUFSIZE)
 				return;
 
-			dyndacbufX[dyndacbuflen_cur] = xOldList[i];
-			dyndacbufY[dyndacbuflen_cur] = yOldList[i];
+			dyndacbufX[dyndacbuflen_cur] = (xOldList[i]+(lastX*(cursteps-1))) / cursteps;
+			dyndacbufY[dyndacbuflen_cur] = (yOldList[i]+(lastY*(cursteps-1))) / cursteps;
+			lastX = dyndacbufX[dyndacbuflen_cur];
+			lastY = dyndacbufY[dyndacbuflen_cur];
 			dyndacbuflen_cur++;
 
 		}
-
 	}
 }
 
 // Mostly old implementation
 void updateGameState(){
 
-	 HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin,!ballside);
-	 HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin,ballside);
+	HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, !ballside);
+	HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, ballside);
 
 	if (ballside != (xOld >= NETPOS))
-	  {
-	    ballside = (xOld >= NETPOS);
+	{
+		ballside = (xOld >= NETPOS);
 
-	    if (ballside)
-	      Rused = 0;
-	    else
-	      Lused = 0;
+		if (ballside)
+			Rused = 0;
+		else
+			Lused = 0;
 
-	    //CheckNet = 1;
-	  }
+		//CheckNet = 1;
+	}
 
-	  if (NewBall > 10) // IF ball has run out of energy, make a new ball!
-	  {
-	    NewBall = 0;
-	    deadball = 0;
-	    NewBallDelay = 1;
-	    server = (ballside == 0) ? LEFT : RIGHT;
+	if (NewBall > 10) // IF ball has run out of energy, make a new ball!
+	{
+		NewBall = 0;
+		deadball = 0;
+		NewBallDelay = 1;
+		server = ((ballside^floorbounced) != 0) ? LEFT : RIGHT; // New serve logic
 
-	    if (server == LEFT)
-	    {
-	      xOld = (float)servePosRight;
-	      VxOld = 0;// (float) -2*g;
-	      ballside = 1;
-	      Rused = 0;
-	      Lused = 1;
-	    }
-	    else
-	    {
-	      xOld = (float)servePosLeft;
-	      VxOld = 0;// (float) 2*g;
-	      ballside = 0;
-	      Rused = 1;
-	      Lused = 0;
-	    }
+		if (server == LEFT)
+		{
+			xOld = (float)servePosRight;
+			VxOld = 0;// (float) -2*g;
+			ballside = 1;
+			Rused = 0;
+			Lused = 1;
+		}
+		else
+		{
+			xOld = (float)servePosLeft;
+			VxOld = 0;// (float) 2*g;
+			ballside = 0;
+			Rused = 1;
+			Lused = 0;
+		}
 
-	    yOld = (float)serveHeight;
+		yOld = (float)serveHeight;
 
-	    m = 0;
-	    while (m < historyLength)
-	    {
-	      xOldList[m] = xOld;
-	      yOldList[m] = yOld;
-	      m++;
-	    }
-	  }
+		m = 0;
+		while (m < historyLength)
+		{
+			xOldList[m] = xOld;
+			yOldList[m] = yOld;
+			m++;
+		}
+	}
 
-	  if(!ballside){
-	      Langle = 0xfff - getAnalogInput(0);
+	if (!ballside)
+	{
+		Langle = 0xfff - getAnalogInput(0);
 
-	    }else{
-	      Rangle = 0xfff - getAnalogInput(1);
-	    }
-	  if (NewBallDelay)
-	    {
-	      if (HAL_GPIO_ReadPin(BTN1_GPIO_Port, BTN1_Pin) == 0 || HAL_GPIO_ReadPin(BTN2_GPIO_Port, BTN2_Pin) == 0)
-	        NewBallDelay = 5000;
+	}
+	else
+	{
+		Rangle = 0xfff - getAnalogInput(1);
+	}
+	if (NewBallDelay)
+	{
+		if (HAL_GPIO_ReadPin(BTN1_GPIO_Port, BTN1_Pin) == 0 || HAL_GPIO_ReadPin(BTN2_GPIO_Port, BTN2_Pin) == 0)
+			NewBallDelay = 5000;
 
-	      NewBallDelay++;
+		NewBallDelay++;
 
-	      if (NewBallDelay > 2000)  // was 5000
-	        NewBallDelay = 0;
+		if (NewBallDelay > 2000)  // was 5000
+			NewBallDelay = 0;
 
 
-	      VxNew = VxOld;
-	      VyNew = VyOld;
-	      Xnew = xOld;
-	      Ynew = yOld;
-	    }
-	    else
-	    {
-	      Xnew = xOld + VxOld;
-	      Ynew = yOld + VyOld - 0.5*g*ts*ts;
+		VxNew = VxOld;
+		VyNew = VyOld;
+		Xnew = xOld;
+		Ynew = yOld;
+	}
+	else
+	{
+		Xnew = xOld + VxOld;
+		Ynew = yOld + VyOld - 0.5 * g * ts * ts;
 
-	      VyNew = VyOld - g*ts;
-	      VxNew = VxOld;
+		VyNew = VyOld - g * ts;
+		VxNew = VxOld;
 
-	      // Bounce at walls
-	      if (Xnew < MINDACVAL)
-	      {
-	        VxNew *= -0.05;
-	        VyNew *= 0.1;
-	        Xnew = 0.1;
-	        deadball = 1;
-	        NewBall = 100;
-	      }
+		// Bounce at walls
+		if (Xnew < MINDACVAL)
+		{
+			VxNew *= -0.05;
+			VyNew *= 0.1;
+			Xnew = 0.1;
+			deadball = 1;
+			NewBall = 100;
+		}
 
-	      if (Xnew > MAXDACVAL)
-	      {
-	        VxNew *= -0.05;
-	        Xnew = MAXDACVAL;
-	        deadball = 1;
-	        NewBall = 100;
-	      }
+		if (Xnew > MAXDACVAL)
+		{
+			VxNew *= -0.05;
+			VyNew *= 0.1;
+			Xnew = MAXDACVAL;
+			deadball = 1;
+			NewBall = 100;
+		}
 
-	      if (Ynew <= MINDACVAL)
-	      {
-	        Ynew = MINDACVAL;
+		if (Ynew <= MINDACVAL)
+		{
+			Ynew = MINDACVAL;
+			floorbounced = 1;
 
-	        if (VyNew*VyNew < 10)
-	          NewBall++;
+			if (VyNew * VyNew < 10)
+				NewBall++;
 
-	        if (VyNew < 0)
-	          VyNew *= -0.75;
-	      }
+			if (VyNew < 0)
+				VyNew *= -0.75;
+		}
 
-	      if (Ynew >= MAXDACVAL)
-	      {
-	        Ynew = MAXDACVAL;
-	        VyNew = 0;
-	      }
+		if (Ynew >= MAXDACVAL)
+		{
+			Ynew = MAXDACVAL;
+			VyNew = 0;
+		}
 
-	      if (ballside)
-	      {
-	        if (Xnew < NETPOS)
-	        {
-	          if (Ynew <= NETHEIGHT)
-	          {
-	            // Bounce off of net
-	            VxNew *= -0.5;
-	            VyNew *= 0.5;
-	            Xnew = NETPOS+2;
-	            deadball = 1;
+		if (ballside)
+		{
+			if (Xnew < NETPOS)
+			{
+				if (Ynew <= NETHEIGHT)
+				{
+					// Bounce off of net
+					VxNew *= -0.5;
+					VyNew *= 0.5;
+					Xnew = NETPOS + 2;
+					deadball = 1;
 
-	          }
-	        }
-	      }
+				}
+			}
+		}
 
-	      if (ballside == 0)
-	      {
-	        if (Xnew > NETPOS)
-	        {
-	          if (Ynew <= NETHEIGHT)
-	          {
-	            // Bounce off of net
-	            VxNew *= -0.5;
-	            VyNew *= 0.5;
-	            Xnew = NETPOS-2;
-	            deadball = 1;
-	          }
-	        }
-	      }
+		if (ballside == 0)
+		{
+			if (Xnew > NETPOS)
+			{
+				if (Ynew <= NETHEIGHT)
+				{
+					// Bounce off of net
+					VxNew *= -0.5;
+					VyNew *= 0.5;
+					Xnew = NETPOS - 2;
+					deadball = 1;
+				}
+			}
+		}
+		GPIO_PinState rBtn = HAL_GPIO_ReadPin(BTN2_GPIO_Port, BTN2_Pin);
+		GPIO_PinState lBtn = HAL_GPIO_ReadPin(BTN1_GPIO_Port, BTN1_Pin);
+		float angleOfs = 2.07f;
 
-	      // Simple routine to detect button presses: works, if the presses are slow enough.
+		if (xOld < NETPOS - 10)
+		{
+			//	    	  HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin,1);
 
-	      if (xOld < NETPOS-10)
-	      {
-//	    	  HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin,1);
-	        if (HAL_GPIO_ReadPin(BTN1_GPIO_Port, BTN1_Pin) == 0)
-	        {
-	          if ((Lused == 0) && (deadball == 0))
-	          {
-	            VxNew = HITSTRENGTH*g*cos((float) 0.001 * (float)Langle - (float) 2.07);//costable[Langle];
-	            VyNew = g + HITSTRENGTH*g*sin((float) 0.001 * (float)Langle - (float) 2.07);
+			if (lBtn == 0 && lastLBtn != 0)
+			{
+				if ((Lused == 0) && (deadball == 0))
+				{
+					float angleF = Langle;
+					float strength = MIN(angleF < 2048 ? HITSTRENGTH * (4096.0f-angleF)/1024.0f : HITSTRENGTH,30.0f);
+					VxNew = (strength) * g * cos((float)0.001f * angleF - angleOfs);//costable[Langle];
+					VyNew = g + strength * g * sin((float)0.001f * (float)Langle - angleOfs);
 
-	            Lused = 1;
-	            NewBall = 0;
-	          }
-	        }
-	      }
-	      else if (xOld > NETPOS+10)  // Ball on right side of screen
-	      {
-//	    	  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin,1);
-	        if (HAL_GPIO_ReadPin(BTN2_GPIO_Port, BTN2_Pin) == 0)
-	        {
-	          if ((Rused == 0) && (deadball == 0))
-	          {
-	            VxNew = -HITSTRENGTH*g*cos((float) 0.001 * (float)Rangle - (float) 2.07);
-	            VyNew = g + -HITSTRENGTH*g*sin((float) 0.001 * (float)Rangle - (float) 2.07);
+					Lused = 1;
+					NewBall = 0;
+					floorbounced = 0;
+				}
+			}
 
-	            Rused = 1;
-	            NewBall = 0;
-	          }
-	        }
-	      }
-	    }
+		}
+		else if (xOld > NETPOS + 10)  // Ball on right side of screen
+		{
+			//	    	  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin,1);
 
-	    //Figure out which point we're going to draw.
-	    xp = floor(Xnew);
-	    yp = floor(Ynew);
-	    //yp = 511 - (int) floor(Ynew);
-//	    XOUT(xp);
-//	    YOUT(yp);
-	    // Draw trail
+			if ( rBtn == 0 && lastRBtn != 0)
+			{
+				if ((Rused == 0) && (deadball == 0))
+				{
+					float angleF = 4096-Rangle;
+					float strength = MIN(angleF < 2048 ? HITSTRENGTH * (4096.0f-angleF)/1024.0f : HITSTRENGTH,30.0f);
+					VxNew = -strength * g * cos((float)0.001f * (float)Rangle - angleOfs);
+					VyNew = g + -strength * g * sin((float)0.001f * (float)Rangle - angleOfs);
 
-	    m = 0;
-	    while (m < (historyLength - 1))
-	    {
-	      xOldList[m] = xOldList[m + 1];
-	      yOldList[m] = yOldList[m + 1];
-	      m++;
-	    }
+					Rused = 1;
+					NewBall = 0;
+					floorbounced = 0;
+				}
+			}
 
-	    xOldList[(historyLength - 1)] = xp;
-	    yOldList[(historyLength - 1)] = yp;
-	    makeBallTrail(historyLength);
-	    //Age variables for the next iteration
-	    VxOld = VxNew;
-	    VyOld = VyNew;
+		}
+		lastRBtn = rBtn;
+		lastLBtn = lBtn;
+	}
 
-	    xOld = Xnew;
-	    yOld = Ynew;
+	//Figure out which point we're going to draw.
+	xp = floor(Xnew);
+	yp = floor(Ynew);
+	//yp = 511 - (int) floor(Ynew);
+	//	    XOUT(xp);
+	//	    YOUT(yp);
+	// Draw trail
+
+	m = 0;
+	while (m < (historyLength - 1))
+	{
+		xOldList[m] = xOldList[m + 1];
+		yOldList[m] = yOldList[m + 1];
+		m++;
+	}
+
+	xOldList[(historyLength - 1)] = xp;
+	yOldList[(historyLength - 1)] = yp;
+	makeBallTrail(historyLength);
+	//Age variables for the next iteration
+	VxOld = VxNew;
+	VyOld = VyNew;
+
+	xOld = Xnew;
+	yOld = Ynew;
 
 }
 
@@ -351,7 +374,7 @@ void stopDacs(){
 // Helper to output DMA data to DACs
 void outputDacs(const uint16_t* bufx,const uint16_t* bufy,uint32_t len){
 	//stopDacs();
-	dacBusy = 1;
+
 	// Upper 12b Chan2 lower 12b chan1
 	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*)bufx, len, DAC_ALIGN_12B_R);
 	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t*)bufy, len, DAC_ALIGN_12B_R);
@@ -373,7 +396,7 @@ void drawDynamic(){
 
 
 void setDacBuffer(const uint16_t* bufX,const uint16_t* bufY,uint32_t len){
-	if(curBufX == bufX && curBufY == bufY){
+	if((curBufX == bufX && curBufY == bufY) || dacBusy){
 		return; // Do nothing to prevent glitch
 	}
 	curBufCounter = 0;
@@ -383,12 +406,13 @@ void setDacBuffer(const uint16_t* bufX,const uint16_t* bufY,uint32_t len){
 }
 
 void loadNewDmaData(uint32_t dstbegin,uint32_t dstend){
+	dacBusy = 1;
 	for(uint32_t i = 0;i<dstend-dstbegin;i++){
 		uint32_t j = curBufCounter++ % curBufLen; // Circular
 		dacbufX[dstbegin+i] = curBufX[j];
 		dacbufY[dstbegin+i] = curBufY[j];
 	}
-
+	dacBusy = 0;
 }
 
 void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac){
