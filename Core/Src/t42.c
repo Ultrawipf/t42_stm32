@@ -43,6 +43,7 @@ volatile uint8_t drawState = 0;
 volatile uint8_t timUpdateFlag = 0;
 volatile uint8_t gameUpdateFlag = 0;
 volatile uint8_t dacBusy = 0;
+volatile uint8_t bufferUpdBusy = 0;
 
 GPIO_PinState lastLBtn = 1;
 GPIO_PinState lastRBtn = 1;
@@ -95,9 +96,11 @@ uint8_t Rused = 0;
 
 
 
-
 void updateGame(){
-
+	if(gameUpdateFlag){
+		gameUpdateFlag = 0;
+		updateGameState();
+	}
 	if(timUpdateFlag){
 		timUpdateFlag = 0;
 		if((drawState++ % 4) == 0){ // Alternate between buffers
@@ -106,12 +109,6 @@ void updateGame(){
 			drawField();
 		}
 	}
-	if(gameUpdateFlag){
-		gameUpdateFlag = 0;
-		updateGameState();
-	}
-
-
 }
 
 void makeBallTrail(uint16_t length){
@@ -121,8 +118,9 @@ void makeBallTrail(uint16_t length){
 	while(--i){
 		uint16_t cursteps = (i/6) + 1;
 		for(uint16_t j = 0;j<cursteps;j++){
-			if(dyndacbuflen_cur >= DYN_DACBUFSIZE)
+			if(dyndacbuflen_cur >= DYN_DACBUFSIZE){
 				return;
+			}
 
 			dyndacbufX[dyndacbuflen_cur] = (xOldList[i]+(lastX*(cursteps-1))) / cursteps;
 			dyndacbufY[dyndacbuflen_cur] = (yOldList[i]+(lastY*(cursteps-1))) / cursteps;
@@ -398,13 +396,19 @@ void setDacBuffer(const uint16_t* bufX,const uint16_t* bufY,uint32_t len){
 	if((curBufX == bufX && curBufY == bufY) || dacBusy){
 		return; // Do nothing to prevent glitch
 	}
+	bufferUpdBusy = 1;
+	//curBufLen = MIN(curBufLen,len);
 	curBufCounter = 0;
 	curBufX = bufX;
 	curBufY = bufY;
 	curBufLen = len;
+	bufferUpdBusy = 0;
 }
 
 void loadNewDmaData(uint32_t dstbegin,uint32_t dstend){
+	if(bufferUpdBusy){
+		return; // Just cycle last buffer again
+	}
 	dacBusy = 1;
 	for(uint32_t i = 0;i<dstend-dstbegin;i++){
 		uint32_t j = curBufCounter++ % curBufLen; // Circular
