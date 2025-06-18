@@ -135,8 +135,8 @@ void makeBallTrail(uint16_t length){
 // Mostly old implementation
 void updateGameState(){
 
-	HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, !ballside);
-	HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, ballside);
+	HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, !ballside && !deadball);
+	HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, ballside && !deadball);
 
 	if (ballside != (xOld >= NETPOS))
 	{
@@ -151,13 +151,13 @@ void updateGameState(){
 		floorbounced = 0;
 	}
 
-	if (NewBall > 10) // IF ball has run out of energy, make a new ball!
+	if (NewBall > 5) // IF ball has run out of energy, make a new ball!
 	{
 		NewBall = 0;
 		deadball = 0;
 		NewBallDelay = 1;
 		server = ((ballside^floorbounced) != 0) ? LEFT : RIGHT; // New serve logic
-
+		floorbounced = 0;
 		if (server == LEFT)
 		{
 			xOld = (float)servePosRight;
@@ -198,11 +198,11 @@ void updateGameState(){
 	if (NewBallDelay)
 	{
 		if (HAL_GPIO_ReadPin(BTN1_GPIO_Port, BTN1_Pin) == 0 || HAL_GPIO_ReadPin(BTN2_GPIO_Port, BTN2_Pin) == 0)
-			NewBallDelay = 5000;
+			NewBallDelay = 2000;
 
 		NewBallDelay++;
 
-		if (NewBallDelay > 2000)  // was 5000
+		if (NewBallDelay > 1000)  // was 5000
 			NewBallDelay = 0;
 
 
@@ -241,13 +241,19 @@ void updateGameState(){
 		if (Ynew <= MINDACVAL)
 		{
 			Ynew = MINDACVAL;
-			floorbounced = 1;
+
 
 			if (VyNew * VyNew < 10)
 				NewBall++;
 
-			if (VyNew < 0)
+			if (VyNew < 0){
 				VyNew *= -0.75;
+				if(floorbounced && !deadball){
+					deadball = 1;
+					NewBall = 1;
+				}
+				floorbounced = 1;
+			}
 		}
 
 		if (Ynew >= MAXDACVAL)
