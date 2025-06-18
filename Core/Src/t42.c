@@ -156,7 +156,7 @@ void updateGameState(){
 		NewBall = 0;
 		deadball = 0;
 		NewBallDelay = 1;
-		server = ((ballside^floorbounced) != 0) ? LEFT : RIGHT; // New serve logic
+		server = ((ballside^(floorbounced&1)) != 0) ? LEFT : RIGHT; // New serve logic
 		floorbounced = 0;
 		if (server == LEFT)
 		{
@@ -248,11 +248,14 @@ void updateGameState(){
 
 			if (VyNew < 0){
 				VyNew *= -0.75;
-				if(floorbounced && !deadball){
-					deadball = 1;
-					NewBall = 1;
+				if(floorbounced){
+					if(!deadball){
+						deadball = 1;
+						NewBall = 100; // Immediately respawn
+					}
+				}else{
+					floorbounced = 1;
 				}
-				floorbounced = 1;
 			}
 		}
 
@@ -311,6 +314,7 @@ void updateGameState(){
 
 					Lused = 1;
 					NewBall = 0;
+					floorbounced = 0;
 				}
 			}
 
@@ -330,6 +334,7 @@ void updateGameState(){
 
 					Rused = 1;
 					NewBall = 0;
+					floorbounced = 0;
 				}
 			}
 
