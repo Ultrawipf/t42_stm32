@@ -404,7 +404,7 @@ void drawDynamic(){
 
 
 void setDacBuffer(const uint16_t* bufX,const uint16_t* bufY,uint32_t len){
-	if((curBufX == bufX && curBufY == bufY) || dacBusy){
+	if((curBufX == bufX && curBufY == bufY)){
 		return; // Do nothing to prevent glitch
 	}
 	bufferUpdBusy = 1;
@@ -481,7 +481,7 @@ void setupGame(){
 	startADC();
 	drawField();
 	startDacs();
-
+	htim6.Instance->CNT = htim6.Instance->ARR / 2; // Offset a bit
 	HAL_TIM_Base_Start_IT(&htim6); // Game update timers
 	HAL_TIM_Base_Start_IT(&htim7); // Game update timer
 }
