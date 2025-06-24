@@ -197,12 +197,12 @@ void updateGameState(){
 	}
 	if (NewBallDelay)
 	{
-		if (HAL_GPIO_ReadPin(BTN1_GPIO_Port, BTN1_Pin) == 0 || HAL_GPIO_ReadPin(BTN2_GPIO_Port, BTN2_Pin) == 0)
-			NewBallDelay = 2000;
+		if (ballside ? HAL_GPIO_ReadPin(BTN2_GPIO_Port, BTN2_Pin) == 0 : HAL_GPIO_ReadPin(BTN1_GPIO_Port, BTN1_Pin) == 0)
+			NewBallDelay = 5000;
 
 		NewBallDelay++;
 
-		if (NewBallDelay > 1000)  // was 5000
+		if (NewBallDelay > 2000)  // was 5000
 			NewBallDelay = 0;
 
 
