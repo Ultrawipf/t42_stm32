@@ -2,7 +2,7 @@
  * t42.c
  *
  *  Created on: May 23, 2025
- *      Author: Yannick
+ *      Author: Yannick Richter
  */
 
 #ifndef INC_T42_C_

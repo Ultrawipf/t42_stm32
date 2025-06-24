@@ -2,7 +2,11 @@
  * t42.c
  *
  *  Created on: May 23, 2025
- *      Author: Yannick
+ *      Author: Yannick Richter
+ *
+ *  Game logic partially based on previous Tennis for two implementation from https://www.evilmadscientist.com/2008/resurrecting-tennis-for-two-a-video-game-from-1958/
+ *  Original base project: 2007 Windell H. Oskay
+ *  Distributed under the terms of the GNU General Public License (See LICENSE file)
  */
 
 
@@ -49,14 +53,10 @@ GPIO_PinState lastLBtn = 1;
 GPIO_PinState lastRBtn = 1;
 
 
-// Old implementation
 #define g 0.8           //gravitational acceleration (should be positive.)
 #define ts 0.12        // TimeStep TODO tune x16 due to higher resolution
 
 #define historyLength 36
-
-//float sintable[64];
-//float costable[64];
 
 uint16_t xOldList[historyLength]; // Replace with dac buffer
 uint16_t yOldList[historyLength];
@@ -84,11 +84,9 @@ uint8_t NewBall = 101;
 unsigned int NewBallDelay = 0;
 
 //Dummy variables:
-uint8_t k = 0;
 uint8_t m = 0;
 
 uint8_t server = LEFT;
-//uint8_t CheckNet = 0;
 
 uint8_t ballside;
 uint8_t Lused = 0;
