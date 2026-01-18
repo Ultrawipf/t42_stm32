@@ -1,10 +1,11 @@
 #MicroXplorer Configuration settings - do not modify
 ADC.Channel-0\#ChannelRegularConversion=ADC_CHANNEL_21
 ADC.Channel-1\#ChannelRegularConversion=ADC_CHANNEL_18
-ADC.ClockPrescaler=ADC_CLOCK_ASYNC_DIV4
-ADC.ContinuousConvMode=ENABLE
+ADC.ClockPrescaler=ADC_CLOCK_ASYNC_DIV1
+ADC.ContinuousConvMode=DISABLE
 ADC.DMAContinuousRequests=ENABLE
-ADC.IPParameters=Rank-0\#ChannelRegularConversion,Channel-0\#ChannelRegularConversion,SamplingTime-0\#ChannelRegularConversion,NbrOfConversionFlag,ScanConvMode,ContinuousConvMode,DMAContinuousRequests,Rank-1\#ChannelRegularConversion,Channel-1\#ChannelRegularConversion,SamplingTime-1\#ChannelRegularConversion,NbrOfConversion,ClockPrescaler
+ADC.ExternalTrigConv=ADC_EXTERNALTRIGCONV_T6_TRGO
+ADC.IPParameters=Rank-0\#ChannelRegularConversion,Channel-0\#ChannelRegularConversion,SamplingTime-0\#ChannelRegularConversion,NbrOfConversionFlag,ScanConvMode,ContinuousConvMode,DMAContinuousRequests,Rank-1\#ChannelRegularConversion,Channel-1\#ChannelRegularConversion,SamplingTime-1\#ChannelRegularConversion,NbrOfConversion,ClockPrescaler,ExternalTrigConv
 ADC.NbrOfConversion=2
 ADC.NbrOfConversionFlag=1
 ADC.Rank-0\#ChannelRegularConversion=1
@@ -242,9 +243,10 @@ TIM2.TIM_MasterOutputTrigger=TIM_TRGO_UPDATE
 TIM4.IPParameters=Period
 TIM4.Period=4096
 TIM6.AutoReloadPreload=TIM_AUTORELOAD_PRELOAD_DISABLE
-TIM6.IPParameters=Period,Prescaler,AutoReloadPreload
+TIM6.IPParameters=Period,Prescaler,AutoReloadPreload,TIM_MasterOutputTrigger
 TIM6.Period=400
 TIM6.Prescaler=319
+TIM6.TIM_MasterOutputTrigger=TIM_TRGO_UPDATE
 TIM7.IPParameters=Prescaler,Period
 TIM7.Period=400
 TIM7.Prescaler=319
