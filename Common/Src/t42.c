@@ -214,8 +214,8 @@ void updateGameState(){
 		Xnew = xOld + VxOld;
 		Ynew = yOld + VyOld - 0.5 * g * ts * ts;
 
-		VyNew = VyOld - g * ts;
-		VxNew = VxOld;
+		VyNew = (VyOld * AIRRESISTANCE) - g * ts;
+		VxNew = VxOld * AIRRESISTANCE; // Air resistance
 
 		// Bounce at walls
 		if (Xnew < MINDACVAL)

@@ -13,7 +13,8 @@
 #define DACBUFSIZE 384
 
 
-#define HITSTRENGTH 20.0f
+#define HITSTRENGTH 26.0f
+#define AIRRESISTANCE 0.9977
 
 
 #define MIN(a,b) (a < b ? a : b)
