@@ -13,8 +13,11 @@
 #define DACBUFSIZE 384
 
 
-#define HITSTRENGTH 26.0f
-#define AIRRESISTANCE 0.9977
+#define HITSTRENGTH 28.0f
+#define HITSTRENGTHSMASH 40.0f
+
+#define AIRRESISTANCE 0.0025
+#define SMASHANGLE 2100
 
 
 #define MIN(a,b) (a < b ? a : b)

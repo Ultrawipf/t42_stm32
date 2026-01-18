@@ -214,8 +214,13 @@ void updateGameState(){
 		Xnew = xOld + VxOld;
 		Ynew = yOld + VyOld - 0.5 * g * ts * ts;
 
-		VyNew = (VyOld * AIRRESISTANCE) - g * ts;
-		VxNew = VxOld * AIRRESISTANCE; // Air resistance
+		float Vxy = sqrtf(VyOld*VyOld + VxOld*VxOld);
+
+		float dragY =  (Vxy * VyOld) * AIRRESISTANCE;
+		VyNew = (VyOld) - (g+dragY) * ts;
+
+		float dragX =  (Vxy * VxOld) * AIRRESISTANCE;
+		VxNew = VxOld - (dragX * ts); // Air resistance
 
 		// Bounce at walls
 		if (Xnew < MINDACVAL)
@@ -306,7 +311,7 @@ void updateGameState(){
 				if ((Lused == 0) && (deadball == 0))
 				{
 					float angleF = Langle;
-					float strength = MIN(angleF < 2048 ? HITSTRENGTH * (4096.0f-angleF)/1024.0f : HITSTRENGTH,30.0f);
+					float strength = MIN(angleF < SMASHANGLE ? HITSTRENGTH * (4096.0f-angleF)/1024.0f : HITSTRENGTH,HITSTRENGTHSMASH);
 					VxNew = (strength) * g * cos((float)0.001f * angleF - angleOfs);//costable[Langle];
 					VyNew = g + strength * g * sin((float)0.001f * (float)Langle - angleOfs);
 
@@ -326,7 +331,7 @@ void updateGameState(){
 				if ((Rused == 0) && (deadball == 0))
 				{
 					float angleF = 4096-Rangle;
-					float strength = MIN(angleF < 2048 ? HITSTRENGTH * (4096.0f-angleF)/1024.0f : HITSTRENGTH,30.0f);
+					float strength = MIN(angleF < SMASHANGLE ? HITSTRENGTH * (4096.0f-angleF)/1024.0f : HITSTRENGTH,HITSTRENGTHSMASH);
 					VxNew = -strength * g * cos((float)0.001f * (float)Rangle - angleOfs);
 					VyNew = g + -strength * g * sin((float)0.001f * (float)Rangle - angleOfs);
 
