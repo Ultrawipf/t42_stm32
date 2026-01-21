@@ -13,14 +13,14 @@
 #define DACBUFSIZE 380
 
 
-#define HITSTRENGTH 28.0f
+#define HITSTRENGTH 25.0f
 #define HITSTRENGTHSMASH 40.0f
 
-#define AIRRESISTANCE 0.0025
+#define AIRRESISTANCE 0.003
 #define SMASHANGLE 2100
 
 #define g 0.8           //gravitational acceleration (should be positive.)
-#define ts 0.12        // TimeStep TODO tune x16 due to higher resolution
+#define ts 0.08        // TimeStep TODO tune x16 due to higher resolution
 
 #define historyLength 37
 #define BUFSWAPCNT 3 // How often to draw the field for one ball update

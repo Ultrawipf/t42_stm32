@@ -8,10 +8,10 @@
 #ifndef INC_T42_CONSTANTS_H_
 #define INC_T42_CONSTANTS_H_
 #include "main.h"
-#define NETPOS 1951
-#define NETHEIGHT 694
-#define MINDACVAL 53
-#define MAXDACVAL 3850
+#define NETPOS 2032
+#define NETHEIGHT 522
+#define MINDACVAL 50
+#define MAXDACVAL 4015
 #define FIELDLENGTH 1480
 
 extern const uint16_t fieldX[FIELDLENGTH];
