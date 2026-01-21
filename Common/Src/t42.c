@@ -13,7 +13,7 @@
 #include "t42.h"
 #include "t42_constants.h"
 #include "math.h"
-
+#include "string.h"
 
 uint32_t adcvals[2];
 
@@ -23,7 +23,9 @@ uint16_t dyndacbufY[DYN_DACBUFSIZE] = {0};
 const uint16_t* curBufX;
 const uint16_t* curBufY;
 uint32_t curBufLen = 0;
-uint32_t curBufCounter = 0;
+uint32_t* curBufCounter;
+uint32_t curFieldBufCounter = 0;
+uint32_t curBallBufCounter = 0;
 uint16_t dacbufX[DACBUFSIZE] = {0};
 uint16_t dacbufY[DACBUFSIZE] = {0};
 
@@ -52,11 +54,6 @@ volatile uint8_t bufferUpdBusy = 0;
 GPIO_PinState lastLBtn = 1;
 GPIO_PinState lastRBtn = 1;
 
-
-#define g 0.8           //gravitational acceleration (should be positive.)
-#define ts 0.12        // TimeStep TODO tune x16 due to higher resolution
-
-#define historyLength 36
 
 uint16_t xOldList[historyLength]; // Replace with dac buffer
 uint16_t yOldList[historyLength];
@@ -101,7 +98,8 @@ void updateGame(){
 	}
 	if(timUpdateFlag){
 		timUpdateFlag = 0;
-		if((drawState++ % 4) == 0){ // Alternate between buffers
+		if((++drawState % BUFSWAPCNT) == 0){ // Alternate between buffers
+			drawState = 0;
 			drawDynamic();
 		}else{
 			drawField();
@@ -396,23 +394,29 @@ void outputDacs(const uint16_t* bufx,const uint16_t* bufy,uint32_t len){
 
 // Draws game field
 void drawField(){
-	setDacBuffer(fieldX,fieldY,FIELDLENGTH);
-
+	setDacBuffer(fieldX,fieldY,FIELDLENGTH,&curFieldBufCounter);
+//	curFieldBufCounter = (curFieldBufCounter + FIELDLENGTH) % DACBUFSIZE;
+//	curBufCounter = curFieldBufCounter;
+//	curFieldBufCounter = 0;
 }
 
 // Draws dynamic buffer (ball)
 void drawDynamic(){
-	setDacBuffer(dyndacbufX,dyndacbufY,dyndacbuflen_cur);
+//	curBallBufCounter = 0;
+	setDacBuffer(dyndacbufX,dyndacbufY,dyndacbuflen_cur,&curBallBufCounter);
+//	curBufCounter = 0;
+
 }
 
 
-void setDacBuffer(const uint16_t* bufX,const uint16_t* bufY,uint32_t len){
-	if((curBufX == bufX && curBufY == bufY)){
+void setDacBuffer(const uint16_t* bufX,const uint16_t* bufY,uint32_t len,uint32_t*bufcounter){
+	if((curBufX == bufX && curBufY == bufY) || !bufcounter){
 		return; // Do nothing to prevent glitch
 	}
 	bufferUpdBusy = 1;
 	//curBufLen = MIN(curBufLen,len);
-	curBufCounter = 0;
+	*bufcounter = *bufcounter % len;
+	curBufCounter = bufcounter;
 	curBufX = bufX;
 	curBufY = bufY;
 	curBufLen = len;
@@ -424,11 +428,55 @@ void loadNewDmaData(uint32_t dstbegin,uint32_t dstend){
 		return; // Just cycle last buffer again
 	}
 	dacBusy = 1;
-	for(uint32_t i = 0;i<dstend-dstbegin;i++){
-		uint32_t j = curBufCounter++ % curBufLen; // Circular
-		dacbufX[dstbegin+i] = curBufX[j];
-		dacbufY[dstbegin+i] = curBufY[j];
-	}
+
+    uint32_t total_to_copy = dstend - dstbegin;
+    uint32_t copied = 0;
+
+    // Initial source index based on current counter
+    uint32_t s_idx = (*curBufCounter) % curBufLen;
+
+    while (copied < total_to_copy) {
+        uint32_t remaining = total_to_copy - copied;
+
+        // Distance to the end of the source buffer
+        uint32_t src_to_end = curBufLen - s_idx;
+
+        // The chunk is the smaller of what we need vs what is available before a wrap
+        uint32_t chunk = (remaining < src_to_end) ? remaining : src_to_end;
+
+        // Perform block copies
+#ifdef DAC_INV_X
+        // If inversion required use regular loop
+        for(uint32_t i = 0;i < chunk;i++){
+		   dacbufX[dstbegin + copied + i] = MAXDACVAL-curBufX[s_idx+i];
+        }
+#else
+	    memcpy(&dacbufX[dstbegin + copied], &curBufX[s_idx], chunk * sizeof(uint16_t));
+#endif
+        memcpy(&dacbufY[dstbegin + copied], &curBufY[s_idx], chunk * sizeof(uint16_t));
+
+        copied += chunk;
+
+        // Wrap the source index: if we hit the end, reset to 0
+        s_idx += chunk;
+        if (s_idx >= curBufLen) {
+            s_idx = 0;
+        }
+    }
+
+    // Update the external counter by the total amount processed
+    *curBufCounter += total_to_copy;
+
+//	for(uint32_t i = 0;i<dstend-dstbegin;i++){
+//		uint32_t j = (*curBufCounter)++ % curBufLen; // Circular. TODO OPTIMIZE
+//#ifdef DAC_INV_X
+//		dacbufX[dstbegin+i] = MAXDACVAL-curBufX[j];
+//#else
+//		dacbufX[dstbegin+i] = curBufX[j];
+//#endif
+//
+//		dacbufY[dstbegin+i] = curBufY[j];
+//	}
 	dacBusy = 0;
 }
 

@@ -10,7 +10,7 @@
 
 #include "main.h"
 #define DYN_DACBUFSIZE 128
-#define DACBUFSIZE 384
+#define DACBUFSIZE 380/2
 
 
 #define HITSTRENGTH 28.0f
@@ -18,6 +18,12 @@
 
 #define AIRRESISTANCE 0.0025
 #define SMASHANGLE 2100
+
+#define g 0.8           //gravitational acceleration (should be positive.)
+#define ts 0.12        // TimeStep TODO tune x16 due to higher resolution
+
+#define historyLength 36
+#define BUFSWAPCNT 2 // How often to draw the field for one ball update
 
 
 #define MIN(a,b) (a < b ? a : b)
@@ -35,7 +41,7 @@ void startADC();
 void stopDacs();
 void outputDacs(const uint16_t* bufx,const uint16_t* bufy,uint32_t len);
 
-void setDacBuffer(const uint16_t* bufX,const uint16_t* bufY,uint32_t len);
+void setDacBuffer(const uint16_t* bufX,const uint16_t* bufY,uint32_t len,uint32_t* bufcounter);
 void loadNewDmaData(uint32_t dstbegin,uint32_t dstend);
 
 
