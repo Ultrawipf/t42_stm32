@@ -9,8 +9,8 @@
 #define INC_T42_C_
 
 #include "main.h"
-#define DYN_DACBUFSIZE 128
-#define DACBUFSIZE 380/2
+#define DYN_DACBUFSIZE 190
+#define DACBUFSIZE 380
 
 
 #define HITSTRENGTH 28.0f
@@ -22,8 +22,9 @@
 #define g 0.8           //gravitational acceleration (should be positive.)
 #define ts 0.12        // TimeStep TODO tune x16 due to higher resolution
 
-#define historyLength 36
-#define BUFSWAPCNT 2 // How often to draw the field for one ball update
+#define historyLength 37
+#define BUFSWAPCNT 3 // How often to draw the field for one ball update
+#define BALLTRAILDIV 4
 
 
 #define MIN(a,b) (a < b ? a : b)

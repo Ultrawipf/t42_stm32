@@ -112,7 +112,7 @@ void makeBallTrail(uint16_t length){
 	dyndacbuflen_cur = 0;
 	uint16_t lastX = xOldList[length-1],lastY = yOldList[length-1];
 	while(--i){
-		uint16_t cursteps = (i/6) + 1;
+		uint16_t cursteps = (i/BALLTRAILDIV) + 1;
 		for(uint16_t j = 0;j<cursteps;j++){
 			if(dyndacbuflen_cur >= DYN_DACBUFSIZE){
 				return;
