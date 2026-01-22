@@ -12,18 +12,34 @@
 #define DYN_DACBUFSIZE 190
 #define DACBUFSIZE 380
 
-
+#ifndef HITSTRENGTH
 #define HITSTRENGTH 25.0f
+#endif
+
+#ifndef HITSTRENGTHSMASH
 #define HITSTRENGTHSMASH 40.0f
+#endif
 
+#ifndef AIRRESISTANCE
 #define AIRRESISTANCE 0.003
+#endif
+#ifndef SMASHANGLE
 #define SMASHANGLE 2100
+#endif
 
-#define g 0.8           //gravitational acceleration (should be positive.)
-#define ts 0.08        // TimeStep TODO tune x16 due to higher resolution
+//gravitational acceleration
+#define GRAVITY 0.8
+#ifndef TIMESTEP
+// TimeStep
+#define TIMESTEP 0.09
+#endif
 
-#define historyLength 37
-#define BUFSWAPCNT 3 // How often to draw the field for one ball update
+#ifndef BUFSWAPCNT
+// How often to draw the field for one ball update
+#define BUFSWAPCNT 3
+#endif
+
+#define HISTORYLEN 37
 #define BALLTRAILDIV 4
 
 

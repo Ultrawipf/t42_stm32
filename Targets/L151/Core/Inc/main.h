@@ -31,11 +31,6 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#define TIM_DAC htim2
-#define TIM_FRAME htim6
-#define TIM_GAME htim7
-#define DAC_OUT hdac
-#define ADC_POTS hadc
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -67,6 +62,13 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define TIMESTEP 0.09
+#define BUFSWAPCNT 3
+#define TIM_DAC htim2
+#define TIM_FRAME htim6
+#define TIM_GAME htim7
+#define DAC_OUT hdac
+#define ADC_POTS hadc
 #define LED0_Pin GPIO_PIN_1
 #define LED0_GPIO_Port GPIOA
 #define LED1_Pin GPIO_PIN_2

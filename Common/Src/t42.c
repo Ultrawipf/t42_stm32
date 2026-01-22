@@ -55,8 +55,8 @@ GPIO_PinState lastLBtn = 1;
 GPIO_PinState lastRBtn = 1;
 
 
-uint16_t xOldList[historyLength]; // Replace with dac buffer
-uint16_t yOldList[historyLength];
+uint16_t xOldList[HISTORYLEN]; // Replace with dac buffer
+uint16_t yOldList[HISTORYLEN];
 
 float xOld; // a few x & y position values
 float yOld; // a few x & y position values
@@ -174,7 +174,7 @@ void updateGameState(){
 		yOld = (float)serveHeight;
 
 		m = 0;
-		while (m < historyLength)
+		while (m < HISTORYLEN)
 		{
 			xOldList[m] = xOld;
 			yOldList[m] = yOld;
@@ -210,15 +210,15 @@ void updateGameState(){
 	else
 	{
 		Xnew = xOld + VxOld;
-		Ynew = yOld + VyOld - 0.5 * g * ts * ts;
+		Ynew = yOld + VyOld - 0.5 * GRAVITY * TIMESTEP * TIMESTEP;
 
 		float Vxy = sqrtf(VyOld*VyOld + VxOld*VxOld);
 
 		float dragY =  (Vxy * VyOld) * AIRRESISTANCE;
-		VyNew = (VyOld) - (g+dragY) * ts;
+		VyNew = (VyOld) - (GRAVITY+dragY) * TIMESTEP;
 
 		float dragX =  (Vxy * VxOld) * AIRRESISTANCE;
-		VxNew = VxOld - (dragX * ts); // Air resistance
+		VxNew = VxOld - (dragX * TIMESTEP); // Air resistance
 
 		// Bounce at walls
 		if (Xnew < MINDACVAL)
@@ -310,8 +310,8 @@ void updateGameState(){
 				{
 					float angleF = Langle;
 					float strength = MIN(angleF < SMASHANGLE ? HITSTRENGTH * (4096.0f-angleF)/1024.0f : HITSTRENGTH,HITSTRENGTHSMASH);
-					VxNew = (strength) * g * cos((float)0.001f * angleF - angleOfs);//costable[Langle];
-					VyNew = g + strength * g * sin((float)0.001f * (float)Langle - angleOfs);
+					VxNew = (strength) * GRAVITY * cos((float)0.001f * angleF - angleOfs);//costable[Langle];
+					VyNew = GRAVITY + strength * GRAVITY * sin((float)0.001f * (float)Langle - angleOfs);
 
 					Lused = 1;
 					NewBall = 0;
@@ -330,8 +330,8 @@ void updateGameState(){
 				{
 					float angleF = 4096-Rangle;
 					float strength = MIN(angleF < SMASHANGLE ? HITSTRENGTH * (4096.0f-angleF)/1024.0f : HITSTRENGTH,HITSTRENGTHSMASH);
-					VxNew = -strength * g * cos((float)0.001f * (float)Rangle - angleOfs);
-					VyNew = g + -strength * g * sin((float)0.001f * (float)Rangle - angleOfs);
+					VxNew = -strength * GRAVITY * cos((float)0.001f * (float)Rangle - angleOfs);
+					VyNew = GRAVITY + -strength * GRAVITY * sin((float)0.001f * (float)Rangle - angleOfs);
 
 					Rused = 1;
 					NewBall = 0;
@@ -353,16 +353,16 @@ void updateGameState(){
 	// Draw trail
 
 	m = 0;
-	while (m < (historyLength - 1))
+	while (m < (HISTORYLEN - 1))
 	{
 		xOldList[m] = xOldList[m + 1];
 		yOldList[m] = yOldList[m + 1];
 		m++;
 	}
 
-	xOldList[(historyLength - 1)] = xp;
-	yOldList[(historyLength - 1)] = yp;
-	makeBallTrail(historyLength);
+	xOldList[(HISTORYLEN - 1)] = xp;
+	yOldList[(HISTORYLEN - 1)] = yp;
+	makeBallTrail(HISTORYLEN);
 	//Age variables for the next iteration
 	VxOld = VxNew;
 	VyOld = VyNew;
@@ -445,7 +445,7 @@ void loadNewDmaData(uint32_t dstbegin,uint32_t dstend){
         uint32_t chunk = (remaining < src_to_end) ? remaining : src_to_end;
 
         // Perform block copies
-#ifdef DAC_INV_X
+#if defined(DAC_INV_X) && DAC_INV_X != 0
         // If inversion required use regular loop
         for(uint32_t i = 0;i < chunk;i++){
 		   dacbufX[dstbegin + copied + i] = MAXDACVAL-curBufX[s_idx+i];
