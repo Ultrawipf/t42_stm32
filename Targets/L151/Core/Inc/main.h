@@ -63,7 +63,7 @@ void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define TIMESTEP 0.09
-#define BUFSWAPCNT 3
+#define BUFSWAPCNT 2
 #define TIM_DAC htim2
 #define TIM_FRAME htim6
 #define TIM_GAME htim7

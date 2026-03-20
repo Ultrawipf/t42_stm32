@@ -13,7 +13,7 @@
 #define DACBUFSIZE 380
 
 #ifndef HITSTRENGTH
-#define HITSTRENGTH 25.0f
+#define HITSTRENGTH 26.0f
 #endif
 
 #ifndef HITSTRENGTHSMASH
