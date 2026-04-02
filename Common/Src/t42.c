@@ -514,6 +514,7 @@ uint16_t getAnalogInput(uint8_t chan){
 
 // ADC in circular continuous mode
 void startADC(){
+	HAL_ADCEx_Calibration_Start(&ADC_POTS, ADC_SINGLE_ENDED);
 	HAL_ADC_Start_DMA(&ADC_POTS, adcvals, 2);
 }
 
@@ -528,7 +529,6 @@ void setupGame(){
 //		costable[m] = cos((float) 0.0647 * (float)m - (float) 2.07);
 //		m++;
 //	}
-
 	startADC();
 	drawField();
 	startDacs();
