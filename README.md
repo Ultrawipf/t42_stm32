@@ -23,3 +23,19 @@ The kit is available on [Lectronz](https://lectronz.com/products/LRAzdcngy_EcO1H
 First version shown in the [Project video](https://www.youtube.com/watch?v=GjI3_GtFCSo).
 
 Design files are available in this repo.
+
+
+### Links
+* [Hackaday.io project blog](https://hackaday.io/project/203185-tennis-for-two-hd)
+* [YouTube project video](https://www.youtube.com/watch?v=GjI3_GtFCSo)
+* [Buy Tennis for two kits](https://lectronz.com/products/LRAzdcngy_EcO1HJ9iuZsVuRM_s1uEzY95U8oW_G/preview) (Custom builds possible. Contact me for details)
+
+### Pictures
+Click to watch YouTube video:
+
+[![Watch the video](https://img.youtube.com/vi/GjI3_GtFCSo/0.jpg)](https://www.youtube.com/watch?v=GjI3_GtFCSo)
+
+
+![Tek 515A](https://cdn.hackaday.io/images/4389791774086771975.JPG)
+
+![Hameg scope](https://cdn.hackaday.io/images/9159371748170791388.JPG)
