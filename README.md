@@ -9,8 +9,16 @@ The code is structured with a common part in the `Common` folder and chip specif
 Designed for the official STM32F303k-Nucleo devboard for use in DIY and Breadboard builds.
 
 Pinouts:
-
-TODO
+Signal | Pin
+---|---
+X-Out | A3 (PA4)
+Y-Out | A4 (PA5)
+Pot left | A0 (PA0)
+Pot right | A1 (PA1)
+Btn left | A5 (PA6)
+Pot left | A6 (PA7)
+LED right | D12 (PB4)
+LED left | D13 (PB3)
 
 #### F303CB
 The latest all in one kit with optional potentiometers and connectors for controllers.
