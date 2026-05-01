@@ -514,7 +514,9 @@ uint16_t getAnalogInput(uint8_t chan){
 
 // ADC in circular continuous mode
 void startADC(){
+#if defined(ADC_SINGLE_ENDED)
 	HAL_ADCEx_Calibration_Start(&ADC_POTS, ADC_SINGLE_ENDED);
+#endif
 	HAL_ADC_Start_DMA(&ADC_POTS, adcvals, 2);
 }
 
