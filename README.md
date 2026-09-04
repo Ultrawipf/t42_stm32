@@ -30,7 +30,7 @@ The kit is available on [Lectronz](https://lectronz.com/products/LRAzdcngy_EcO1H
 #### L151
 First version shown in the [Project video](https://www.youtube.com/watch?v=GjI3_GtFCSo).
 
-Design files are available in this repo.
+Schematics are available in this repo.
 
 
 ### Links
@@ -44,6 +44,9 @@ Click to watch YouTube video:
 [![Watch the video](https://img.youtube.com/vi/GjI3_GtFCSo/0.jpg)](https://www.youtube.com/watch?v=GjI3_GtFCSo)
 
 
-![Tek 515A](https://cdn.hackaday.io/images/4389791774086771975.JPG)
+![Tek 515A](img/Gameplay_Museum.JPG)
 
 ![Hameg scope](https://cdn.hackaday.io/images/9159371748170791388.JPG)
+
+Breadboard setup F303k-NUCLEO
+![Breadboard Nucleo](img/Breadboard_nucleo1.JPG)
